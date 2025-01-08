@@ -278,9 +278,10 @@ class MSTeams {
    */
   async notify(url, payload) {
     const client = new IncomingWebhook(url);
-    const response = await client.send(payload);
-
-    console.log('MSTeams response:', response);
+    try {
+      const response = await client.send(payload);
+    } catch (error) {
+    }
   }
 }
 
