@@ -1,5 +1,5 @@
-const {IncomingWebhook} = require('ms-teams-webhook');
-const {context: github} = require('@actions/github');
+const { IncomingWebhook } = require('ms-teams-webhook');
+const { context: github } = require('@actions/github');
 const core = require('@actions/core');
 
 const placeholder = '';
@@ -60,12 +60,12 @@ const statuses = [{
 function Status(status) {
   if (!status) {
     core.error(`Unknown status value: ${status}`);
-    return statuses.find(({id}) => id === 'unknown');
+    return statuses.find(({ id }) => id === 'unknown');
   }
-  const r = statuses.find(({id}) => id === status.toLowerCase());
+  const r = statuses.find(({ id }) => id === status.toLowerCase());
   if (!r) {
     core.error(`Not implemented status value: ${status}`);
-    return statuses.find(({id}) => id === 'unknown');
+    return statuses.find(({ id }) => id === 'unknown');
   }
   return r;
 }
@@ -183,12 +183,12 @@ class MSTeams {
    * @return
    */
   async generatePayload({
-                          job = {status: 'unknown'},
-                          steps = {},
-                          needs = {},
-                          title = '',
-                          msteams_emails = ''
-                        }) {
+    job = { status: 'unknown' },
+    steps = {},
+    needs = {},
+    title = '',
+    msteams_emails = ''
+  }) {
     const steps_summary = summary_generator(steps, 'outcome');
     const needs_summary = summary_generator(needs, 'result');
     const status_summary = statusSummary(job);
@@ -278,9 +278,10 @@ class MSTeams {
    */
   async notify(url, payload) {
     const client = new IncomingWebhook(url);
-    try {
-      const response = await client.send(payload);
-    } catch (error) {
+    const response = await client.sendRawAdaptiveCard(payload);
+
+    if (response.status !== 202) {
+      throw new Error('Failed to send notification to Microsoft Teams.\n' + 'Response:\n' + JSON.stringify(response, null, 2));
     }
   }
 }
